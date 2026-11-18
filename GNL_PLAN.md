@@ -73,11 +73,23 @@ Status: [ ] not started · [~] in progress · [x] done and checkpoint passed
 | --- | --- | --- |
 | 0 | Read the subject, checkpoint on understanding | [x] 2026-11-04 |
 | 1 | Tools: `read()` behavior, static variables, where memory lives | [x] checkpoint passed 2026-11-07 |
-| 2 | Design on paper: state kept between calls, what each call does, when a line is complete | [ ] |
+| 2 | Design by prototyping in a scratch file, stage by stage (see "Prototype stages"). Short written expectation before each stage, explanation after | [~] started 2026-11-09 (paper-only mapping stalled: my counter-and-skip idea dropped the leftover) |
 | 3 | Helpers (own string functions, only those the design needs), tested one by one | [ ] |
 | 4 | Main function in stages, tested with several BUFFER_SIZE values and input types | [ ] |
 | 5 | Hardening: edge cases, leaks, Norm, README with algorithm justification | [ ] |
 | 6 | Bonus (only after the mandatory part is perfect) | [ ] |
+
+### Prototype stages (phase 2 and onward, scratch file outside the repo)
+
+Rule: before each stage write 2 or 3 lines of what I expect; after it, explain why it behaved that way.
+
+Change on 2026-11-12: I chose to write a full draft in a practice file first, then refine. The stages below become the TEST ORDER for that draft (BUFFER_SIZE 1 first, then 5, 42, 10000000, then the edge cases). Conditions: a short written design goes with the draft (what is static, what is stored between calls, what each call does), and I explain each part before moving on. One function = one job, aiming at 25 lines or fewer, so the Norm split later is easy.
+
+1. [x] (covered by the full draft, tested with BUFFER_SIZE 1) BUFFER_SIZE fixed at 1: read byte by byte until `\n` or EOF, return the line. No leftover needed yet. Questions first: what accumulates the line and where does it live? How do I append with only `malloc`/`free` (no `realloc`)? What ends the loop and what is returned for each ending? Tests: `hello\nworld\n`, a file without a final `\n`, an empty file.
+2. [x] BUFFER_SIZE above 1: read overshoots the `\n` and data is lost. See it fail, then add the leftover (static pointer to heap data).
+3. [~] Edge cases (done: empty file, no final `\n`, `\n\n`, one byte, long line, bad fd, directory, stdin; still open: `malloc` failure in the join path): empty file, last line without `\n`, only `\n`, `read` returning -1, memory freed on every path.
+4. [ ] Split into helpers under the Norm (25 lines per function, 5 functions per file, only `read`/`malloc`/`free`).
+5. [ ] Move to the repo files; test with several BUFFER_SIZE values, stdin, and `-fsanitize=address`.
 
 ### Phase 1 experiments
 
@@ -105,7 +117,9 @@ Status: [ ] not started · [~] in progress · [x] done and checkpoint passed
 
 ## Design decisions (fill in as they are made)
 
-- (none yet)
+- One static pointer `left` to a heap string holding what was read but not yet returned (NULL at start).
+- A helper that appends one chunk **consumes** its first argument: it frees the old `left` whether or not the join worked and returns the new string (NULL on failure). The caller assigns the result, frees `buf`, and returns NULL if the result is NULL. Reason: a failed join must not leak the old text, and must not let the loop carry on with a hole in the data.
+- `ft_substr(s, 0, ft_strlen(s))` serves as a copy, so `ft_strdup` and `ft_memcpy` are not needed (keeps utils at 5 functions).
 
 ## Open questions
 
@@ -127,3 +141,19 @@ Status: [ ] not started · [~] in progress · [x] done and checkpoint passed
 - 2026-11-03: subject received, read by me and by Claude.
 - 2026-11-04: answered the eight reading questions; corrections noted above. Plan agreed. Phase 1 started.
 - 2026-11-05 to 2026-11-07: experiment A (read in chunks) done after several patches: stale bytes, off-by-one terminator, loop not stopping on -1, 10 MB stack crash, leaks on error paths. Experiment B (counter) done. Checkpoint 1 passed on 2026-11-07. Next: phase 2 (design on paper).
+- 2026-11-09: paper mapping stalled (counter-and-skip idea cannot work: `read` consumes data and `lseek` is forbidden). Switched to prototyping.
+- 2026-11-14: first full draft (array of chunks) crashed. Bugs found: write one past the end of the buffer, `arr` never allocated, `=` instead of `==`, chunks not terminated, `read` 0/-1 not handled, all chunks alias one buffer, wrong size arithmetic, leftover never freed. Decision: do not repair it; restart with a single accumulating string. Keep: static pointer to a heap leftover, own `ft_strlen`, the idea of cutting after the first `\n`.
+
+### New design to write down before coding (five steps, own words)
+
+1. Start from the stored leftover (static pointer, NULL on the first call).
+2. While what I hold has no `\n`: `read` into a buffer; if the return is 0 or less, stop; terminate the chunk at the returned count; append it to what I hold (allocate new, copy, free old).
+3. If I hold nothing: free, set the static to NULL, return NULL. If `read` returned -1: free everything and return NULL.
+4. Line = up to and including the first `\n` (or everything if there is none). Leftover = everything after it in a new allocation, or NULL if empty. Free what I held and the buffer.
+5. Test order: BUFFER_SIZE 1, 5, 42, 10000000, then the edge files, always with `-fsanitize=address`.
+
+- 2026-11-17: the draft (static `left`, `read_file`, `make_line`, NULL-safe helpers, `temp` freed after each join) is correct and leak-free: 7 files x 6 buffer sizes (1, 2, 5, 42, 9999, 10000000) all identical to the input under AddressSanitizer; bad fds, a directory and stdin also fine. Known weakness: a very long single line with a small buffer is quadratic (200 KB line: 91 s at BUFFER_SIZE 1, 2.3 s at 42).
+- Remaining before the repo: `malloc` failure inside the join path, Norm (max 5 functions per file: utils has 6; 25 lines; check commas with norminette), header file with guards and prototypes, `static` for internal functions, rename `gnl` to `get_next_line`, remove `main`, README with the algorithm explained, test with the subject's compile command (with and without `-D BUFFER_SIZE`).
+
+- 2026-11-17 (evening): malloc-failure path fixed with the consuming helper. Kit test (`failtest.sh`: the Nth `malloc` fails, N = 1..80): old code 6/80 bad runs, first attempt at the helper (freed `left` only after a successful join, no NULL check in `read_file`) 12/80 at BUFFER_SIZE 1 and 3/80 at 5, final version 0/80 at BUFFER_SIZE 1, 5, 42 and 10000000. Lessons: a helper's contract (who frees what) must hold on the failure path too; an unused variable is a hard error under `-Werror`; `chmod +x` for downloaded scripts.
+- Remaining before the repo: Norm (25 lines, 5 functions per file, check commas with norminette), header file with guards and prototypes, `static` for internal functions, rename `gnl` to `get_next_line`, remove `main`, README with the algorithm explained, test with the subject's compile command (with and without `-D BUFFER_SIZE`).
