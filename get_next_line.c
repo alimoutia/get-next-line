@@ -6,17 +6,17 @@
 /*   By: amoutia <amoutia@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/04 11:15:31 by amoutia           #+#    #+#             */
-/*   Updated: 2026/11/18 16:23:46 by amoutia          ###   ########.fr       */
+/*   Updated: 2026/11/18 16:31:17 by amoutia          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-static *make_line(char **left)
+static char	*make_line(char **left)
 {
-	int i;
-	char *rest;
-	char *temp;
+	int		i;
+	char	*rest;
+	char	*temp;
 
 	i = 0;
 	while ((*left)[i] && (*left)[i] != '\n')
@@ -37,10 +37,10 @@ static *make_line(char **left)
 	return (temp);
 }
 
-static char *read_helper(char *left, char *buf)
+static char	*read_helper(char *left, char *buf)
 {
-	char *line;
-	char *temp;
+	char	*line;
+	char	*temp;
 
 	temp = left;
 	line = ft_strjoin(temp, buf);
@@ -50,10 +50,10 @@ static char *read_helper(char *left, char *buf)
 	return (line);
 }
 
-static char *read_file(int fd, char *left)
+static char	*read_file(int fd, char *left)
 {
-	char *buf;
-	int r;
+	char	*buf;
+	int		r;
 
 	r = 1;
 	while (r > 0 && !ft_strchr(left, '\n'))
@@ -63,7 +63,7 @@ static char *read_file(int fd, char *left)
 			return (free(left), NULL);
 		r = read(fd, buf, BUFFER_SIZE);
 		if (r == -1)
-			return (free(buf),free(left),NULL);
+			return (free(buf), free(left), NULL);
 		buf[r] = '\0';
 		if (r == 0)
 		{
@@ -78,10 +78,10 @@ static char *read_file(int fd, char *left)
 	return (left);
 }
 
-char *get_next_line(int fd)
+char	*get_next_line(int fd)
 {
-	static char *left;
-	char *line;
+	static char	*left;
+	char		*line;
 
 	if (fd < 0 || BUFFER_SIZE < 1)
 		return (NULL);

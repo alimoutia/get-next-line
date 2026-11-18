@@ -6,15 +6,15 @@
 /*   By: amoutia <amoutia@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/04 11:15:28 by amoutia           #+#    #+#             */
-/*   Updated: 2026/11/18 16:22:25 by amoutia          ###   ########.fr       */
+/*   Updated: 2026/11/18 16:32:40 by amoutia          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-int ft_strlen(char *str)
+int	ft_strlen(char *str)
 {
-	int i;
+	int	i;
 
 	if (!str)
 		return (0);
@@ -24,9 +24,9 @@ int ft_strlen(char *str)
 	return (i);
 }
 
-char *ft_strchr(char *s, int c)
+char	*ft_strchr(char *s, int c)
 {
-	int i;
+	int	i;
 
 	if (!s)
 		return (NULL);
@@ -42,11 +42,11 @@ char *ft_strchr(char *s, int c)
 	return (NULL);
 }
 
-char *ft_substr(char *s, int start, int len)
+char	*ft_substr(char *s, int start, int len)
 {
-	int slen;
-	char *subs;
-	int i;
+	int		slen;
+	char	*subs;
+	int		i;
 
 	if (!s)
 		return (NULL);
@@ -71,12 +71,12 @@ char *ft_substr(char *s, int start, int len)
 	return (subs);
 }
 
-char *ft_strjoin(char *s1, char *s2)
+char	*ft_strjoin(char *s1, char *s2)
 {
-	int len;
-	char *s;
-	int i;
-	int j;
+	int		len;
+	char	*s;
+	int		i;
+	int		j;
 
 	if (!s1)
 		return (ft_substr(s2, 0, ft_strlen(s2)));
