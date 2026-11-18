@@ -140,7 +140,7 @@ char *read_file(int fd, char *left)
 	r = 1;
 	while (r > 0 && !ft_strchr(left, '\n'))
 	{
-		buf = malloc(BUFFER_SIZE + 1);
+		buf = malloc((size_t)BUFFER_SIZE + 1);
 		if (!buf)
 			return (free(left), NULL);
 		r = read(fd, buf, BUFFER_SIZE);
@@ -160,27 +160,27 @@ char *read_file(int fd, char *left)
 	return (left);
 }
 
-char *gnl(int fd)
-{
-	static char *left;
-	char *line;
+// char *gnl(int fd)
+// {
+// 	static char *left;
+// 	char *line;
 
-	if (fd < 0 || BUFFER_SIZE < 1)
-		return (NULL);
-	left = read_file(fd, left);
-	if (!left)
-		return (NULL);
-	if (ft_strlen(left) == 0)
-	{
-		free(left);
-		left = NULL;
-		return (NULL);
-	}
-	line = make_line(&left);
-	if (!line)
-		return (NULL);
-	return (line);
-}
+// 	if (fd < 0 || BUFFER_SIZE < 1)
+// 		return (NULL);
+// 	left = read_file(fd, left);
+// 	if (!left)
+// 		return (NULL);
+// 	if (ft_strlen(left) == 0)
+// 	{
+// 		free(left);
+// 		left = NULL;
+// 		return (NULL);
+// 	}
+// 	line = make_line(&left);
+// 	if (!line)
+// 		return (NULL);
+// 	return (line);
+// }
 
 // char *gnl_bonus(int fd)
 // {

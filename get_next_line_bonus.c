@@ -6,7 +6,7 @@
 /*   By: amoutia <amoutia@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/04 11:15:16 by amoutia           #+#    #+#             */
-/*   Updated: 2026/11/18 17:07:04 by amoutia          ###   ########.fr       */
+/*   Updated: 2026/11/18 18:40:46 by amoutia          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,7 @@ static char	*read_file(int fd, char *left)
 	r = 1;
 	while (r > 0 && !ft_strchr(left, '\n'))
 	{
-		buf = malloc(BUFFER_SIZE + 1);
+		buf = malloc((size_t)BUFFER_SIZE + 1);
 		if (!buf)
 			return (free(left), NULL);
 		r = read(fd, buf, BUFFER_SIZE);
