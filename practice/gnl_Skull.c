@@ -1,5 +1,5 @@
-// #include <fcntl.h>
-// #include <stdio.h>
+#include <fcntl.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 
@@ -204,17 +204,21 @@ char *gnl(int fd)
 // 	return (line);
 // }
 
-// int main()
-// {
-// 	int fd = open("text.md", O_RDONLY);
-// 	char *str;
-// 	int i = 0;
-// 	while (i < 3)
-// 	{
-// 		str = gnl(fd);
-// 		printf("%s", str);
-// 		free(str);
-// 		i++;
-// 	}
-// 	close(fd);
-// }
+int	main()
+{
+	int		fd;
+	int		counter;
+	char	*line;
+
+	counter = 0;
+	fd = open("text.md", O_RDONLY);
+	line = gnl(fd);
+	while (line)
+	{
+		counter++;
+		printf("Line N%d : %s", counter, line);
+		free(line);
+		line = gnl(fd);
+	}
+	close(fd);
+}
