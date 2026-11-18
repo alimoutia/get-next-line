@@ -6,7 +6,7 @@
 /*   By: amoutia <amoutia@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/04 11:15:31 by amoutia           #+#    #+#             */
-/*   Updated: 2026/11/18 16:31:17 by amoutia          ###   ########.fr       */
+/*   Updated: 2026/11/18 17:04:59 by amoutia          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,13 +40,9 @@ static char	*make_line(char **left)
 static char	*read_helper(char *left, char *buf)
 {
 	char	*line;
-	char	*temp;
 
-	temp = left;
-	line = ft_strjoin(temp, buf);
-	free(temp);
-	if (!line)
-		return (NULL);
+	line = ft_strjoin(left, buf);
+	free(left);
 	return (line);
 }
 
